@@ -10,20 +10,21 @@ Ordered by how often it actually gets used: daily workflow first, emergencies la
 
 Note: If you are not on site *and* connected to the wired network, make sure you are on the VPN first!
 
-| \# | Command | Reason |
+| \# | Command | Does |
 | --- | --- | --- |
-| 1 | git status | See what's changed since last commit |
-| 2 | git add . | Stage all changes |
-| 3 | git commit -m "Message in past tense" | Save changes to history |
-| 4 | git push | Send commits to GitLab |
-| 5 | git log --oneline [-#] | Show commit history, one line each [optional: the last # of commits] |
+| 1 | `git status` | See what's changed since last commit |
+| 2 | `git add .` | Stage all changes |
+| 3 | `git commit -m "Message in past tense"` | Save changes to history |
+| 4 | `git push` | Send commits to GitLab |
+| 5 | `git log --oneline [-#]` | Show commit history, one line each [optional: the last # of commits] |
 
 ### At Home — Start of Session (Using GitHub, Sitting Down at Either PC)
 
-```powershell
-git status                              # Confirm you're clean before pulling
-git pull --rebase                       # Get whatever the OTHER machine pushed since your last push here (Do this BEFORE you push.)
-```
+| \# | Command | Does |
+| --- | --- | --- |
+| 1 | `git status` | See what's changed since last commit |
+| 2 | `git add .` | Confirm you're clean before pulling |
+| 3 | `git pull --rebase` | Get whatever the OTHER machine pushed since your last push here (Do this BEFORE you push.) |
 
 **Notes:**
 1. `git pull --rebase` avoids merge commits: it fetches the latest remote changes and replays your unpushed local commits on top. **Never use it on a shared branch** — it rewrites commit hashes and disrupts everyone else's work.
@@ -31,14 +32,14 @@ git pull --rebase                       # Get whatever the OTHER machine pushed 
 
 ### At Home — When Committing (Using GitHub)
 
-```powershell
-git status                              # See what's changed since last commit
-git add .                               # Stage all changes
-git commit -m "Message in past tense"   # Save changes to history
-git pull --rebase                       # Get whatever the OTHER machine pushed since your last push here (Do this BEFORE you push.)
-git push                                # Send commits to GitHub
-git log --oneline [-#]                  # Show commit history, one line each [optional: the last # of commits]
-```
+| \# | Command | Does |
+| --- | --- | --- |
+| 1 | `git status` | See what's changed since last commit |
+| 2 | `git add .` | Stage all changes |
+| 3 | `git commit -m "Message in past tense"` | Save changes to history |
+| 4 | `git pull --rebase` | Get whatever the OTHER machine pushed since your last push here (Do this BEFORE you push.) |
+| 5 | `git push` | Send commits to GitHub |
+| 6 | `git log --oneline [-#]` | Show commit history, one line each [optional: the last # of commits] |
 
 **Notes Again:**
 1. `git pull --rebase` avoids merge commits: it fetches the latest remote changes and replays your unpushed local commits on top. **Never use it on a shared branch** — it rewrites commit hashes and disrupts everyone else's work.
@@ -47,7 +48,7 @@ git log --oneline [-#]                  # Show commit history, one line each [op
 ### Staging shortcuts
 
 | Command | Does |
-|---|---|
+| --- | --- |
 | `git add .` | Stage everything — new **and** modified files |
 | `git commit -am "msg"` | Stage + commit modified **tracked** files in one step. Does **not** include new untracked files |
 
@@ -67,7 +68,7 @@ Unity-specific pre-commit settings live in `_UnityQuickReference.md` §8.
 ## 3. Investigating
 
 | Command | Shows |
-|---|---|
+| --- | --- |
 | `git diff` | Unstaged changes |
 | `git diff --staged` | Staged-but-not-committed changes |
 | `git log` | Full commit history with details |
@@ -81,7 +82,7 @@ Unity-specific pre-commit settings live in `_UnityQuickReference.md` §8.
 ## 4. Branching & Switching
 
 | Command | Does |
-|---|---|
+| --- | --- |
 | `git branch` | List branches |
 | `git branch <name>` | Create a new branch |
 | `git switch <name>` | Switch to an existing branch — safer than `checkout` |
@@ -93,7 +94,7 @@ Unity-specific pre-commit settings live in `_UnityQuickReference.md` §8.
 ## 5. Reverting & Restoring
 
 | Command | Does |
-|---|---|
+| --- | --- |
 | `git restore <file>` | Discard unstaged changes in one file |
 | `git restore .` | Discard all unstaged changes in the current directory |
 | `git restore --source=<hash> <file>` | Restore one file from a past commit without moving HEAD |
@@ -119,25 +120,23 @@ Local commits work fine without VPN. Verify the remote with `git remote -v`.
 
 ## 7. Home Projects Using Two Computers for One Project.
 
-To start a new project (local on desktop) and continue it as local on the laptop:
+To start a new project (local on Machine 1) and continue it as local on the Machine 2:
 
-1. Per project (one time on `Helios`, in `E:\Claude Code Projects\[Name of Project]\`):
+1. Per project (one time on Machine 1, in `.\Claude Code Projects\[NameOfProject]\`):
 
-```powershell
-git init
-git add .
-git commit -m "Initial commit"
-gh repo create [Name of Project] --private --source=. --push
-```
+| \# | Command |
+| --- | --- | 
+| 1 | `git init` |
+| 2 | `git add .` |
+| 3 | `git commit -m "Initial commit"` |
+| 4 | `gh repo create [Name of Project] --private --source=. --push` |
 
-2. On `Hephaestus`, pick any folder and go to it. It does not need to be `E:` or match the path:
+2. On Machine 2, pick any folder and go to it. It does not need to be `E:` or match the path:
 
-```powershell
-git clone https://github.com/kwpledger/[Name of Project].git
-
-# Only if the repo has a package.json in its root:
-npm install
-```
+| \# | Command |
+| --- | --- | 
+| 1 | `git clone https://github.com/kwpledger/[NameOfProject].git` |
+| 2 | (Only if the repo has a package.json in its root)<br>`npm install` |
 
 **Note:** `node_modules/` is gitignored on purpose. it's large, machine-specific, and fully derivable. `npm install` reads `package.json` and re-downloads everything locally.
 
@@ -189,7 +188,7 @@ npm install
 - **Other keys inside the pager:**
 
     | Key | Action |
-    |---|---|
+    | --- | --- |
     | `q` | Quit back to the prompt |
     | `Space` / `b` | Page down / page up |
     | `j` / `k` or arrows | Scroll one line |
@@ -206,9 +205,9 @@ npm install
 
 ## 9. In Case of Dire Emergency
 
-```powershell
-git reset --soft HEAD~1                 # this is the safe version (see note below)
-```
+| Command | Does |
+| --- | --- |
+| `git reset --soft HEAD~1` | this is the safe version (see note below) |
 
 Undoes the last commit but **keeps all changes staged** — perfect for when you committed before saving a Unity scene.
 
