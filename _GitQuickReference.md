@@ -1,4 +1,4 @@
-# Git Quick Reference (8/10/2026)
+# Git Quick Reference (8/14/2026)
 
 Ordered by how often it actually gets used: daily workflow first, emergencies last.
 
@@ -10,13 +10,13 @@ Ordered by how often it actually gets used: daily workflow first, emergencies la
 
 Note: If you are not on site *and* connected to the wired network, make sure you are on the VPN first!
 
-```powershell
-git status                              # See what's changed since last commit
-git add .                               # Stage all changes
-git commit -m "Message in past tense"   # Save changes to history
-git push                                # Send commits to GitLab
-git log --oneline [-#]                  # Show commit history, one line each [optional: the last # of commits]
-```
+| \# | Command | Reason |
+| --- | --- | --- |
+| 1 | git status | See what's changed since last commit |
+| 2 | git add . | Stage all changes |
+| 3 | git commit -m "Message in past tense" | Save changes to history |
+| 4 | git push | Send commits to GitLab |
+| 5 | git log --oneline [-#] | Show commit history, one line each [optional: the last # of commits] |
 
 ### At Home — Start of Session (Using GitHub, Sitting Down at Either PC)
 
@@ -50,33 +50,6 @@ git log --oneline [-#]                  # Show commit history, one line each [op
 |---|---|
 | `git add .` | Stage everything — new **and** modified files |
 | `git commit -am "msg"` | Stage + commit modified **tracked** files in one step. Does **not** include new untracked files |
-
-### Escaping the `(END)` prompt
-
-**Symptom:** A long `git log` / `git diff` / `git branch` fills the screen and stops at a line reading `(END)` or `:`. Typing does nothing useful.
-
-**Cause:** Git pipes long output through a *pager* (`less`), a separate program from the 1980s. You're not stuck in Git — you're inside `less`.
-
-**Fix:** Press `q`.
-
-**Other keys inside the pager:**
-
-| Key | Action |
-|---|---|
-| `q` | Quit back to the prompt |
-| `Space` / `b` | Page down / page up |
-| `j` / `k` or arrows | Scroll one line |
-| `/text` + Enter | Search forward (`n` = next match) |
-| `g` / `G` | Jump to top / bottom |
-
-**Avoiding it:**
-
-- One-off: `git --no-pager log --oneline`
-- Never page again: `git config --global core.pager cat`
-- Page only when output exceeds one screen: `git config --global core.pager "less -FRX"`
-
-**Also applies to:** `man` pages, `top`, `htop`, and anything else that hands
-output to `less`. `q` works in all of them.
 
 ---
 
@@ -207,6 +180,27 @@ npm install
 - **GH013 Repository rule violations (`[remote rejected] main -> main`):** GitHub branch protection or rulesets are preventing direct pushes to `main`.
     - **Quick Fix (Solo Project):** Go to `github.com/<user>/<repo>/settings` -> **Rulesets** (or **Branches**) and disable "Require a pull request before merging".
     - **Proper Fix (Using PRs):** Create a branch (`git switch -c updates`), push it (`git push -u origin updates`), and merge via a Pull Request on GitHub after checks pass.
+
+### Escaping the `(END)` prompt
+
+- **Symptom:** A long `git log` / `git diff` / `git branch` fills the screen and stops at a line reading `(END)` or `:`. Typing does nothing useful.
+- **Cause:** Git pipes long output through a *pager* (`less`), a separate program from the 1980s. You're not stuck in Git — you're inside `less`.
+- **Fix:** Press `q`.
+- **Other keys inside the pager:**
+
+    | Key | Action |
+    |---|---|
+    | `q` | Quit back to the prompt |
+    | `Space` / `b` | Page down / page up |
+    | `j` / `k` or arrows | Scroll one line |
+    | `/text` + Enter | Search forward (`n` = next match) |
+    | `g` / `G` | Jump to top / bottom |
+
+- **Avoiding it:**
+    - One-off: `git --no-pager log --oneline`
+    - Never page again: `git config --global core.pager cat`
+    - Page only when output exceeds one screen: `git config --global core.pager "less -FRX"`
+- **Also applies to:** `man` pages, `top`, `htop`, and anything else that hands output to `less`. `q` works in all of them.
 
 ---
 
