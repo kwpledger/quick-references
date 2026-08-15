@@ -1,4 +1,4 @@
-# Unity Quick Reference (7/30/2026)
+# Unity Quick Reference (8/12/2026)
 
 Animation, gamification, asset import, and Git survival.
 
@@ -256,3 +256,6 @@ Before `git add .`:
 
 - **License revoked — twice.** A Unity Industry license allows anything a Pro license does *and more*. Stop second-guessing it.
 - **Timeline GUID verification:** when disconnecting a scene from a shared Timeline asset, the authoritative done-signal is `m_PlayableAsset` flipping to the new GUID — **not** a zero-match grep. Unity leaves orphaned `m_SceneBindings` entries pointing at old track GUIDs; they're inert and self-clear during scene authoring.
+- CharacterController silently discards moves below `Min Move Distance`. At high frame rates the StarterAssets speed ramp never clears the threshold, so the character deadlocks and looks "stuck on nothing." Leave it at 0.
+- StarterAssets' `IsCurrentDeviceMouse` compares against `"KeyboardMouse"`, but Unity 6's default input asset names the scheme `"Keyboard&Mouse"` — the mismatch silently multiplies mouse look by `Time.deltaTime`, making the camera frame-rate dependent and choppy.
+- Match `skinWidth` to ~10% of radius whenever you change the radius.
