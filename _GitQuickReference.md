@@ -124,26 +124,26 @@ To start a new project (local on Machine 1) and continue it as local on the Mach
 
 1. Per project (one time on Machine 1, in `.\Claude Code Projects\[NameOfProject]\`):
 
-| \# | Command |
-| --- | --- | 
-| 1 | `git init` |
-| 2 | `git add .` |
-| 3 | `git commit -m "Initial commit"` |
-| 4 | `gh repo create [Name of Project] --private --source=. --push` |
+    | \# | Command |
+    | --- | --- | 
+    | 1 | `git init` |
+    | 2 | `git add .` |
+    | 3 | `git commit -m "Initial commit"` |
+    | 4 | `gh repo create [Name of Project] --private --source=. --push` |
 
-2. On Machine 2, pick any folder and go to it. It does not need to be `E:` or match the path:
+2. On Machine 2, pick any folder and go to it. It does not need to have the same drive letter or match the path:
 
-| \# | Command |
-| --- | --- | 
-| 1 | `git clone https://github.com/kwpledger/[NameOfProject].git` |
-| 2 | (Only if the repo has a package.json in its root)<br>`npm install` |
+    | \# | Command |
+    | --- | --- | 
+    | 1 | `git clone https://github.com/kwpledger/[NameOfProject].git` |
+    | 2 | (Only if the repo has a package.json in its root)<br>`npm install` |
 
 **Note:** `node_modules/` is gitignored on purpose. it's large, machine-specific, and fully derivable. `npm install` reads `package.json` and re-downloads everything locally.
 
 3. Then the daily rhythm is just:
 
-- Before you start working on a machine: `git pull --rebase`
-- When you stop: `git add -A`; `git commit -m "..."`; `git push`
+    - Before you start working on a machine: `git pull --rebase`
+    - When you stop: `git add -A`; `git commit -m "..."`; `git push`
 
 ### Things I learned from someone else **before** I learned them the hard way
 
