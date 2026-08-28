@@ -1,8 +1,8 @@
-# Unity Quick Reference (8/12/2026)
+# Unity Quick Reference (8/27/2026)
 
 Animation, gamification, asset import, and Git survival.
 
-**Project constants:** Unity 6.5 · URP · Timeline · Cinemachine · new Input System · StarterAssets third-person controller · **60 fps (not 30)**
+**Project constants:** Unity 6.5 · URP · Timeline · Cinemachine · new Input System · StarterAssets third-person controller · **60 fps (not 30)** · StarterAssets third-person controller · **60 fps (not 30)** · **Web (WebGL 2) build target**
 
 ---
 
@@ -24,6 +24,8 @@ Animation, gamification, asset import, and Git survival.
 |---|---|
 | `Ctrl` + `6` | Animation window — for animating individual objects |
 | `Window --> Sequencing` | Timeline window — for multi-object cutscenes |
+
+⚠️ Web builds: embedded VideoClips do not play. See §10.
 
 ### Animation window gotchas
 
@@ -185,6 +187,10 @@ Select the asset in the Project view and set `Scale Factor` / `Convert Units` th
 
 Maya can't export in meters without baking a scale onto the object, because it's centimeters internally even when the display says meters. A clean scale-`1` import means modeling in cm as though it were meters, then importing with **Convert Units unchecked**. Not fixable from inside Unity.
 
+### Character FBX import
+
+Disable Import BlendShapes unless they're driven — a scan-quality character can carry 80+ MB of unused facial shapes. See §10.
+
 ### Wrong-color diagnosis
 
 > **BLACK = stale ambient (regenerate). PINK = wrong pipeline (upgrade or revert).**
@@ -259,3 +265,153 @@ Before `git add .`:
 - CharacterController silently discards moves below `Min Move Distance`. At high frame rates the StarterAssets speed ramp never clears the threshold, so the character deadlocks and looks "stuck on nothing." Leave it at 0.
 - StarterAssets' `IsCurrentDeviceMouse` compares against `"KeyboardMouse"`, but Unity 6's default input asset names the scheme `"Keyboard&Mouse"` — the mismatch silently multiplies mouse look by `Time.deltaTime`, making the camera frame-rate dependent and choppy.
 - Match `skinWidth` to ~10% of radius whenever you change the radius.
+
+---
+
+## 10. Web (WebGL) Builds
+
+Everything learned converting RHWM Emergency Response from a Windows `.exe` target to a Web build for Storyline embedding, 8/17–8/24/2026.
+
+### The one that will get you: embedded VideoClips do not play
+
+**Unity's Web player does not support embedded VideoClips.** A `VideoPlayer` whose Source is `Video Clip` renders a **black rectangle** in the browser. Unity logs it to the browser console, but nothing surfaces in the game, so a stakeholder just sees black:
+
+```
+Embedded video clips are not supported on this platform: Assets/.../Video1.mp4.
+Use the Video Player component's URL option instead.
+```
+
+**The fix:**
+
+1. Move the MP4s to `Assets/StreamingAssets/`.
+2. Set each `VideoPlayer` Source to **URL**, built from `Application.streamingAssetsPath`.
+3. Gate playback on `VideoPlayer.isPrepared` before the `PlayableDirector` plays.
+
+> ⚠️ **Step 3 is the one with teeth.** An embedded clip is available instantly; a URL clip **buffers over HTTP**. If a Timeline signal is timed to fire N frames before a video ends (the "swap under the curtain" pattern), the Timeline can march on while the video lags, and the signal fires against a curtain that isn't there. Re-verify every emitter frame after the switch.
+
+**Side benefit:** `StreamingAssets` files are pulled out of the initial download and stream on demand. That's a real load-time win, not just a compatibility fix.
+
+Render to a **RenderTexture** rather than Camera Far Plane — it's the mode that behaves most reliably on Web.
+
+### Compression, fallback, and server headers
+
+Two *different* settings that get conflated (Player Settings → Publishing Settings):
+
+| Setting | What it controls |
+|---|---|
+| **Compression Format** (Gzip / Brotli) | *How* the build files are compressed |
+| **Decompression Fallback** | *Who* decompresses them — embedded JS, or the browser |
+
+The build files are compressed on disk (`.data.unityweb`, `.wasm.unityweb`). The server must send a matching `Content-Encoding` header, or the browser can't read them. Unity says so in the console:
+
+```
+You can reduce startup time if you configure your web server to add
+"Content-Encoding: gzip" response header when serving Build/....unityweb
+```
+
+**Two-stage approach:**
+
+| Stage | Compression | Decompression Fallback | Server headers |
+|---|---|---|---|
+| First upload / local testing | **Gzip** | **✓ On** | none needed |
+| Once the host can set headers | **Brotli** | **✗ Off** | `Content-Encoding: br` required |
+
+Fallback embeds a JavaScript decompressor so it works anywhere with no server config, at the cost of a bigger loader and slower startup. Brotli compresses smaller but leans harder on correct headers.
+
+> ⚠️ **Brotli over plain HTTP is unreliable in some browsers** — it expects HTTPS. Fine behind AWS/CloudFront; a mystifying failure if anyone tests over plain `http://`.
+
+### You cannot double-click `index.html`
+
+A `file://` URL blocks the fetches the Unity loader makes. The page comes up blank and looks broken. **A Web build must be served by a web server.**
+
+Local testing, from inside the build folder:
+
+```powershell
+py -m http.server 8000
+```
+
+then open `http://localhost:8000`. Unity's **Build And Run** does the same thing automatically, but it rebuilds — serving the folder yourself is faster when a build already exists.
+
+**Tell anyone you hand a build to.** "Double-click index.html" is the single most likely way a reviewer concludes the build is broken when it isn't. Ship a `.bat` launcher alongside it. ⚠️ Some mail filters and SharePoint configs strip `.bat` from zips like they do `.exe`, so put the raw command in the README too.
+
+### Measuring load time honestly
+
+**Use an Incognito window.** Unity caches the `.data` file in **IndexedDB** (`UnityCache`), which is *separate* from the browser's HTTP cache — so DevTools' "Disable cache" checkbox alone will not give you a true first-visit number. A warm reload measured 181 ms and 315 bytes transferred; the same build cold was 226 MB.
+
+> ⚠️ **`localhost` timings are meaningless as a predictor.** 226 MB "downloaded" in 1.33 s over loopback. The number that matters is size ÷ real bandwidth: at 50 Mbps that same build is ~36 seconds of staring at a loading bar.
+
+### Build Profiles (Unity 6)
+
+- The **Scene List does not appear by default** in a Build Profile. Add it via **Add Settings → Scene List**, then tick **Override Global Scene List**. Without the override it displays the shared list without overriding it.
+- ⚠️ Known bug: the Override checkbox can fail to persist. Re-verify right before building.
+- Everything added via **Add Settings** becomes a **per-profile override** that shadows the project-level setting — change Project Settings later and the profile silently keeps its stale copy. Add overrides only where a build genuinely must differ from the editor.
+- **"Desktop – Development" vs "Desktop – Release"** refers to *build instrumentation*, not project maturity. Development bundles the profiler, keeps debug symbols, and skips optimization. For anything a stakeholder sees, use **Release**. Keep Development in your back pocket: Release output is minified and near-unreadable when something fails.
+- **Code Optimization → "Disk Size with LTO"** produces smaller builds and *dramatically* longer build times. Use **"Shorter Build Time"** while iterating; switch to LTO for the deliverable.
+- **Quality Settings default to the Mobile tier for Web.** If you set VSync or anything else on the PC tier, the Web build won't inherit it. Override to PC if targeting desktop browsers — but if the build runs badly, the quality tier is the **first** lever to pull.
+- **Adaptive Performance Settings** prompts to enable **Frame Timing Stats**. Decline both. Adaptive Performance is mobile thermal throttling, and Frame Timing Stats is render profiling — neither has anything to do with Timeline frame accuracy, despite the name.
+
+### Switching platforms
+
+⚠️ **A platform switch reimports every asset in the project — 30–90 minutes on a mid-size project.** Decide the target and stay there; don't ping-pong. If you need a one-off build for another platform, do it *before* switching and save it as its own Build Profile.
+
+The first Web build is also slow regardless (shader compilation + IL2CPP, cold). Start it and walk away.
+
+### Finding the Build Report
+
+Unity 6.5 moved the editor log into the project. `%LOCALAPPDATA%\Unity\Editor\Editor.log` is now a stub that points to:
+
+```
+<ProjectFolder>\Logs\Editor.log
+```
+
+Search for **"Build Report"**. It gives uncompressed totals by category plus every used asset sorted by size — the only reliable way to know what's actually big. Make sure `Logs/` is gitignored.
+
+> **Only *referenced* assets ship.** Unreferenced files in `Assets/` cost editor import time and disk space but **zero bytes** in the build. Deleting unused assets will not shrink a build. The Build Report is titled "Used Assets" for a reason — everything in it is genuinely reachable from a scene in the build list.
+
+### Where the size actually goes
+
+Real numbers from `01_OilSpill`, one scenario:
+
+| | Before | After |
+|---|---|---|
+| Total user assets | 323.3 MB | 163.9 MB |
+| Meshes | 197.9 MB | 38.0 MB |
+| On-disk build | 226 MB | 192 MB |
+
+**The entire difference was two checkboxes.** Both Ken FBXs were **84 MB each — 74% of the whole build** — because a scan-quality character carries a full facial **BlendShape** set that the project never used.
+
+**Standing importer pass for every character asset** (FBX importer → Model tab):
+
+- **Import BlendShapes → OFF** unless blendshapes are actually driven
+- **Mesh Compression → Medium** (usually invisible on organic meshes)
+- **Read/Write → OFF** — when on, Unity keeps a second CPU-side copy and the mesh costs **double**
+- Check the vertex count readout; if the mesh itself is enormous, ask for a decimated version
+
+> ⚠️ Setting blendshape *values* to zero does nothing for build size — that's a runtime deformation setting. You have to stop **importing** them.
+
+**Other things that quietly ship and shouldn't:**
+
+- `com.unity.ai.inference` (Sentis) — several MB of compute shaders, pulled in by AI/MCP tooling, never called by the game. Remove via Package Manager.
+- StarterAssets `Armature_Arms` textures — 13 MB for the default character you replaced.
+- Unity splash logo — 2.7 MB; the Industry license permits disabling it.
+- URP FilmGrain textures — 10 × 256 KB, unless film grain is actually in use.
+- Prop textures are commonly 2048² when 1024² would be indistinguishable at the distance they're seen.
+
+### Rendering differences to expect
+
+- **FSR upscaling is unsupported on Web**, and when the shader fails, **post-processing passes are skipped entirely**:
+
+  ```
+  Shader 'Hidden/Universal Render Pipeline/Edge Adaptive Spatial Upsampling'
+  is not supported (in 'Blit FSR Upscaling'). PostProcessing render passes will not execute.
+  ```
+
+  If the Global Volume does anything visible (tonemapping, bloom, color grading), the browser build will look different from the editor. A/B it.
+- Physics may report `[Physics::Module] Initialized fallback backend`. Works, but it isn't the primary backend — remember it if physics behaves differently in-browser.
+- Browsers drive rendering through `requestAnimationFrame`, generally capped at the display refresh rate. The runaway 600 fps that triggers the `Min Move Distance` deadlock (§9) is unlikely in a browser — but the editor is a harsher environment, so keep the fix.
+
+### Storyline embedding
+
+- A Web Object needs `index.html` at the **root** of the folder, with all supporting files alongside. Storyline imports the whole folder.
+- **Web Objects cannot be previewed inside Storyline.** You must publish and upload to a server to see them.
+- Default Canvas is 960×600. Fine for pipeline testing, small for a 1920×1080-designed UI — size it deliberately against the Web Object frame.
