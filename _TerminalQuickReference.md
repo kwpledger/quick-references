@@ -1,4 +1,4 @@
-# Terminal Quick Reference (7/30/2026)
+# Terminal Quick Reference (8/27/2026)
 
 CMD, PowerShell, Bash — plus paths, redirection, and orientation.
 
@@ -14,6 +14,15 @@ CMD, PowerShell, Bash — plus paths, redirection, and orientation.
 | **Typical commands** | `dir`, `cd`, `copy`, `del`, `type`, `tree` | `Get-ChildItem`, `Set-Location`, `Copy-Item`, `Remove-Item` | `ls`, `cd`, `cp`, `rm`, `cat`, `find`, `grep` |
 
 PowerShell carries aliases that mimic both CMD and Linux — `dir`, `ls`, and `cd` all work. It also runs most CMD commands, but **flag handling differs**, which is where things break.
+
+## 1.1. A Downside, but also an Upside to PowerShell
+
+**Note:** Command Prompt and PowerShell will both open in Windows Terminal. In fact, so will Windows PowerShell. They are different programs. Windows PowerShell (blue icon) is an old version. It has been superseded by PowerShell 7 (x64) (black icon, just referred to in Windows as PowerShell). You want to use this one as it has more functionality. The first time you use it, you need to go into the settings dropdown on Terminal. In the Default Profile dropdown, select the PowerShell with the black icon. This will ensure that you always have the better version load.
+
+How to tell which one you are in: The icon color only helps at launch; if you're already in a tab you need a check: `$PSVersionTable.PSVersion`
+- Major version 5.1 = Windows PowerShell (the old one)
+- Major version 7.x = PowerShell 7.
+- The executables differ too: old is powershell.exe, new is pwsh.exe — useful when writing scripts or shortcuts that must hit the right one.
 
 ---
 
@@ -97,4 +106,5 @@ In Windows File Explorer: right-click empty space inside the folder --> **Open i
 - `dir` has no `/F` flag — that belongs to `tree`.
 - *"Too many parameters - -f"* usually means mixed-up commands, or being in PowerShell when the syntax was CMD.
 - PowerShell opens in `C:\Users\<me>` by default. `cd` to the project folder **before** running Git commands.
+- `cmd1 && cmd2` chaining requires PowerShell 7. If it throws a syntax error, you're in Windows PowerShell 5.1 — check with `$PSVersionTable.PSVersion`. See §1.1.
 - Quote paths with spaces. Always.
