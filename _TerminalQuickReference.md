@@ -1,4 +1,4 @@
-# Terminal Quick Reference (8/27/2026)
+# Terminal Quick Reference (8/28/2026)
 
 CMD, PowerShell, Bash — plus paths, redirection, and orientation.
 
@@ -68,6 +68,27 @@ tree /F /A > structure.txt
 
 dir "C:\Unity Projects\RHWM Emergency Response v0.5" /s > "C:\Unity Projects\RHWM Emergency Response v0.5\structure.txt"
 ```
+
+---
+
+## 5. Auto-Suggestions in Terminal
+
+### In the Current Session Only
+
+1. If you want to keep the feature but want to clear the specific command history it uses to make suggestions for your current session, run: `Clear-History`
+    *(Note: This only clears the current session's active command history history buffer).*
+2. To disable the inline predictions, run this command in your PowerShell window: `Set-PSReadLineOption -PredictionSource None
+3.  To turn the auto-suggestions back on, run this command: `Set-PSReadLineOption -PredictionSource History`
+4. You can also pull predictions from both your history and installed plugin modules (like Azure or Git predictors) by running: `Set-PSReadLineOption -PredictionSource History`
+
+### To Permanently Disable, Enable, or Tweak
+
+To make sure suggestions stay turned off every time you open Windows Terminal, you should add the configuration to your PowerShell profile.
+1. Open your profile script by running: `notepad $PROFILE`
+    *(Note: If prompted to create a new file, click Yes.)*
+2. Paste one of the following options into the document:
+    a. To turn them completely off: `Set-PSReadLineOption -PredictionSource None`
+    b. To use history but switch from inline text to a list view (press F2 to toggle): `Set-PSReadLineOption -PredictionViewStyle ListView`
 
 ---
 
