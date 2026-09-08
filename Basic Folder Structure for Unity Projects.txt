@@ -1,4 +1,4 @@
-# Basic Asset Folder Structure for a New Unity Project
+# Basic Asset Folder Structure for a New Unity Project (9/8/2026)
 
 <!-- Set up this folder structure in any new Unity Project. These will be populated as you build your project, putting assets into reliable locations. -->
 
