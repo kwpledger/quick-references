@@ -1,6 +1,12 @@
-# Git Quick Reference (9/5/2026)
+# Git Quick Reference
 
-Ordered by how often it actually gets used: daily workflow first, emergencies last.
+**Authored by:** Kevin Pledger
+
+**Verified (and occasionally updated) by:** Claude
+
+**Last updated:** September 17, 2026
+
+Git, GitHub, and GitLab — ordered by how often it actually gets used: daily workflow first, emergencies last.
 
 ---
 
