@@ -1,4 +1,10 @@
-# Terminal Quick Reference (8/28/2026)
+# Terminal Quick Reference
+
+**Authored by:** Kevin Pledger
+
+**Verified (and occasionally updated) by:** Claude
+
+**Last updated:** September 17, 2026
 
 CMD, PowerShell, Bash — plus paths, redirection, and orientation.
 
@@ -77,9 +83,9 @@ dir "C:\Unity Projects\RHWM Emergency Response v0.5" /s > "C:\Unity Projects\RHW
 
 1. If you want to keep the feature but want to clear the specific command history it uses to make suggestions for your current session, run: `Clear-History`
     *(Note: This only clears the current session's active command history history buffer).*
-2. To disable the inline predictions, run this command in your PowerShell window: `Set-PSReadLineOption -PredictionSource None
-3.  To turn the auto-suggestions back on, run this command: `Set-PSReadLineOption -PredictionSource History`
-4. You can also pull predictions from both your history and installed plugin modules (like Azure or Git predictors) by running: `Set-PSReadLineOption -PredictionSource History`
+2. To disable the inline predictions, run this command in your PowerShell window: `Set-PSReadLineOption -PredictionSource None`
+3. To turn the auto-suggestions back on, run this command: `Set-PSReadLineOption -PredictionSource History`
+4. To pull predictions from **both** your history and installed plugin modules (Azure, Git predictors), the value is `HistoryAndPlugin`, not `History`: `Set-PSReadLineOption -PredictionSource HistoryAndPlugin` ⚠️ *This line previously repeated the `History` command from item 3, which does not include plugins.*
 
 ### To Permanently Disable, Enable, or Tweak
 
@@ -92,7 +98,7 @@ To make sure suggestions stay turned off every time you open Windows Terminal, y
 
 ---
 
-## 5. Paths & Orientation
+## 6. Paths & Orientation
 
 ### Path conventions
 
@@ -121,7 +127,7 @@ In Windows File Explorer: right-click empty space inside the folder --> **Open i
 
 ---
 
-## 6. Things I Learned the Hard Way
+## 7. Things I Learned the Hard Way
 
 - `tree` flag order and case don't matter (`/F /A` == `/a /f`).
 - `dir` has no `/F` flag — that belongs to `tree`.
