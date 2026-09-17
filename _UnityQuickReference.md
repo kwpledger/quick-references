@@ -1,8 +1,18 @@
-# Unity Quick Reference (8/27/2026)
+# Unity Quick Reference
+
+**Authored by:** Kevin Pledger
+
+**Verified (and occasionally updated) by:** Claude
+
+**Last updated:** September 17, 2026
 
 Animation, gamification, asset import, and Git survival.
 
-**Project constants:** Unity 6.5 · URP · Timeline · Cinemachine · new Input System · StarterAssets third-person controller · **60 fps (not 30)** · StarterAssets third-person controller · **60 fps (not 30)** · **Web (WebGL 2) build target**
+---
+
+**RHWM Project constants:** Unity **6.6 (6000.6.0f1)** · URP · Timeline · Cinemachine · new Input System · StarterAssets third-person controller · **60 fps (not 30)** · **Web (WebGL 2) build target**
+
+> ⚠️ **This file is general Unity knowledge. Where it disagrees with the RHWM project docs, the project docs win.** Two sections have been overtaken by decisions made in that project and are annotated in place: **§2's Video Player table** (now reversed) and **§6** (superseded by `docs/PIPELINE.md`). The project's own reference set is `CLAUDE.md` plus `docs/ARCHITECTURE.md`, `docs/PIPELINE.md`, `docs/DECISIONS.md`.
 
 ---
 
@@ -47,12 +57,19 @@ Animation, gamification, asset import, and Git survival.
 
 ### Video Player settings for Timeline-driven video
 
+> ## ⚠️⚠️ REVERSED — THIS TABLE USED TO SAY "Play On Awake ON". IT IS NOW **OFF**. ##
+>
+> The ON advice was correct for a **desktop build with embedded VideoClips**, where each video sits on its own GameObject that an Activation Track switches on. It is **wrong for the WebGL rig**, where URL-sourced players must live on an **always-active** `VideoRig` so they can call `Prepare()` — a VideoPlayer on an inactive GameObject cannot. With the rig always active, `Play On Awake` ON fires **every** video's audio at scene load, all at once.
+>
+> **WebGL settings, which is what this project builds:** VideoPlayer **`Play On Awake` OFF**, **`Skip On Drop` OFF**. A `PlayVideoOnEnable` script on each `Display_*` RawImage preserves the Activation-Track semantics the ON setting used to provide. Full contract: `docs/ARCHITECTURE.md` §2.
+
 | Setting | What it actually does |
 |---|---|
-| **Play On Awake** | Misleadingly named. Fires on `OnEnable` — the moment the GameObject becomes active — **not** at scene load. Must be **ON** for a video driven by an Activation Track, or the track enables the object and nothing plays. |
+| **Play On Awake** | Misleadingly named — fires on `OnEnable`, the moment the GameObject becomes active, **not** at scene load. ⚠️ **OFF** for URL-sourced WebGL video on an always-active rig (see the banner above). ON only applies to the legacy embedded-VideoClip pattern, where the Activation Track toggles the player's own GameObject. |
+| **Skip On Drop** | ⚠️ **OFF.** Lets the player drop frames to hold wall-clock sync — which desynchronizes it from the Timeline that is cueing signals against it. |
 | **Wait For First Frame** | A loading buffer: don't start video or audio until the movie file's first frame is fully loaded onto the Render Texture. Prevents the brief black flash or lag spike at the moment the object turns on. |
 
-Unlike MonoBehaviour `Awake()`, which runs once, `Play On Awake` **re-fires every time the object is re-enabled** — so a re-shown video replays from the start.
+Unlike MonoBehaviour `Awake()`, which runs once, `Play On Awake` **re-fires every time the object is re-enabled** — so a re-shown video replays from the start. *(This is why the always-active rig cannot use it.)*
 
 ---
 
@@ -161,6 +178,8 @@ public class ProximityTrigger : MonoBehaviour
 ---
 
 ## 6. Asset Import Troubleshooting
+
+> ⚠️ **SUPERSEDED for RHWM work by `docs/PIPELINE.md` §1–7.** Everything below is still true, but PIPELINE carries the fuller, harder-won version: three-way color diagnosis (**BLACK** = stale ambient · **PINK** = wrong pipeline · **WHITE/GRAY** = missing texture, the case this section doesn't cover), the FBX sub-asset material extraction ceremony, finding embedded textures in `.fbm`, the standing character importer pass, and the Blender export conventions. Use PIPELINE first; treat this as the short form.
 
 ### Scale
 
@@ -283,9 +302,11 @@ Use the Video Player component's URL option instead.
 
 **The fix:**
 
-1. Move the MP4s to `Assets/StreamingAssets/`.
-2. Set each `VideoPlayer` Source to **URL**, built from `Application.streamingAssetsPath`.
+1. Move the MP4s to `Assets/StreamingAssets/` — a **magic folder that must sit at the `Assets` root**, not nested under a project subfolder.
+2. Set each `VideoPlayer` Source to **URL**, built from `Application.streamingAssetsPath`. ⚠️ The filename string must match **exactly**; a typo is a black rectangle with **no console error**.
 3. Gate playback on `VideoPlayer.isPrepared` before the `PlayableDirector` plays.
+4. ⚠️ **Put the VideoPlayers on an ALWAYS-ACTIVE rig** and have Activation Tracks drive separate `Display_*` RawImages instead. **A VideoPlayer on an inactive GameObject cannot call `Prepare()`** — so the thing that must stay on to buffer and the thing the track must switch off cannot be the same object. Consequence: **`Play On Awake` OFF** (see §2's banner).
+5. ⚠️ **Browser autoplay policy blocks audible media until a user gesture.** A click-to-begin panel before anything plays supplies the gesture, unlocks the WebAudio context, *and* gives `Prepare()` its buffer window. The unlock is **per-page, not per-scene**. Without it, a build that works in the editor is silent in the browser.
 
 > ⚠️ **Step 3 is the one with teeth.** An embedded clip is available instantly; a URL clip **buffers over HTTP**. If a Timeline signal is timed to fire N frames before a video ends (the "swap under the curtain" pattern), the Timeline can march on while the video lags, and the signal fires against a curtain that isn't there. Re-verify every emitter frame after the switch.
 
@@ -358,7 +379,7 @@ The first Web build is also slow regardless (shader compilation + IL2CPP, cold).
 
 ### Finding the Build Report
 
-Unity 6.5 moved the editor log into the project. `%LOCALAPPDATA%\Unity\Editor\Editor.log` is now a stub that points to:
+Unity 6.5 moved the editor log into the project (still true in 6.6). `%LOCALAPPDATA%\Unity\Editor\Editor.log` is now a stub that points to:
 
 ```
 <ProjectFolder>\Logs\Editor.log
