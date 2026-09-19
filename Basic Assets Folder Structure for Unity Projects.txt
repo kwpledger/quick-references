@@ -1,0 +1,53 @@
+Basic Asset Folder Structure for a New Unity Project
+
+Authored by: Kevin Pledger
+Verified (and occasionally updated) by: Claude
+Last updated: September 17, 2026
+
+Instructions: Set up this folder structure in any new Unity Project. These will be populated as you build your project, putting assets into reliable locations.
+
+---
+
+Folder PATH listing for volume Windows
+Volume serial number is xxxx-xxxx
+
+D:\Unity Projects\<projectName>\Assets
+├─── _Project
+│    ├─── Animations
+│    ├─── Audio
+│    │    ├─── Music
+│    │    ├─── SFX
+│    │    └─── Voiceover
+│    ├─── Materials
+│    │    ├─── Equipment
+│    │    ├─── Library
+│    ├─── Models
+│    │    ├─── Architecture
+│    │    ├─── Characters
+│    │    ├─── Cutscenes
+│    │    ├─── Equipment
+│    │    └─── Props
+│    ├─── Prefabs
+│    │    ├─── Characters
+│    │    ├─── Cutscenes
+│    │    ├─── Environment
+│    │    └─── UI
+│    ├─── ScriptableObjects
+│    ├─── Scripts
+│    │    ├─── Core
+│    │    ├─── Cutscenes
+│    │    ├─── Editor
+│    │    ├─── Interaction
+│    │    ├─── Player
+│    │    └─── UI
+│    ├─── Shaders
+│    ├─── Signals
+│    ├─── Timelines
+│    └─── Video
+├─── AIToolkit
+├─── Resources
+├─── Scenes
+├─── Settings
+│    └─── BuildProfiles
+├─── StreamingAssets
+└─── ThirdParty
