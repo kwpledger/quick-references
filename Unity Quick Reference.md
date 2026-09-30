@@ -4,7 +4,7 @@
 
 **Verified (and occasionally updated) by:** Claude
 
-**Last updated:** September 17, 2026
+**Last updated:** September 29, 2026
 
 Animation, gamification, asset import, and Git survival.
 
@@ -258,16 +258,16 @@ Replacing an FBX **in Windows Explorer** (same filename) preserves the Unity `.m
 
 ## 8. Git Harmony (Unity-specific)
 
-Full Git command reference lives in `_GitQuickReference.md`. These are the Unity-side items only.
+Full Git command reference lives in `Git Quick Reference.md`. These are the Unity-side items only.
 
-Before `git add .`:
+Before `git add -A` or `git add --all`:
 
 - [ ] Save all scenes (`Ctrl` + `S`) **and** the project (`File --> Save Project`).
 - [ ] Close Unity before major reverts or branch switches (prevents file locking).
 - [ ] `Project Settings --> Editor --> Version Control` = **Visible Meta Files**.
 - [ ] `Project Settings --> Editor --> Asset Serialization` = **Force Text**.
 
-**Note:** Be careful with GitHub Large File Storage on your *personal* account. It is very limited in storage and in bandwidth, with a monthly quota. Going over this can get very expensive, very quickly. More detail can be found in the Git LFS quota/billing note, which lives in `_GitQuickReference.md` §7.
+**Note:** Be careful with GitHub Large File Storage on your *personal* account. It is very limited: 10 GiB of storage total, plus 10 GiB of download bandwidth per month. Going over either can get expensive quickly. More detail can be found in the Git LFS quota/billing note, which lives in `Git Quick Reference.md` §7.
 
 > **The Golden Rule of Unity Git:** never delete, move, or rename a file outside the Unity Project window.
 >

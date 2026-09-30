@@ -4,7 +4,7 @@
 
 **Verified (and occasionally updated) by:** Claude
 
-**Last updated:** September 17, 2026
+**Last updated:** September 29, 2026
 
 Git, GitHub, and GitLab — ordered by how often it actually gets used: daily workflow first, emergencies last.
 
@@ -19,7 +19,7 @@ Note: If you are not on site *and* connected to the wired network, make sure you
 | \# | Command | Does |
 | --- | --- | --- |
 | 1 | `git status` | See what's changed since last commit |
-| 2 | `git add .` | Stage all changes |
+| 2 | `git add -A` or `git add --all` | Stage everything -- new, modified, and deleted files -- in the entire repository |
 | 3 | `git commit -m "Message in past tense"` | Save changes to history |
 | 4 | `git push` | Send commits to GitLab |
 | 5 | `git log --oneline [-#]` | Show commit history, one line each [optional: the last # of commits] |
@@ -28,9 +28,8 @@ Note: If you are not on site *and* connected to the wired network, make sure you
 
 | \# | Command | Does |
 | --- | --- | --- |
-| 1 | `git status` | See what's changed since last commit |
-| 2 | `git add .` | Stage all changes |
-| 3 | `git pull --rebase` | Get whatever the OTHER machine pushed since your last push here (Do this BEFORE you push.) |
+| 1 | `git status` | Confirm you're clean before pulling |
+| 2 | `git pull --rebase` | Get whatever the OTHER machine pushed since your last push here (Do this BEFORE you push.) |
 
 **Notes:**
 1. `git pull --rebase` avoids merge commits: it fetches the latest remote changes and replays your unpushed local commits on top. **Never use it on a shared branch** — it rewrites commit hashes and disrupts everyone else's work.
@@ -41,7 +40,7 @@ Note: If you are not on site *and* connected to the wired network, make sure you
 | \# | Command | Does |
 | --- | --- | --- |
 | 1 | `git status` | See what's changed since last commit |
-| 2 | `git add .` | Stage all changes |
+| 2 | `git add -A` or `git add --all` | Stage everything -- new, modified, and deleted files -- in the entire repository |
 | 3 | `git commit -m "Message in past tense"` | Save changes to history |
 | 4 | `git pull --rebase` | Get whatever the OTHER machine pushed since your last push here (Do this BEFORE you push.) |
 | 5 | `git push` | Send commits to GitHub |
@@ -55,7 +54,8 @@ Note: If you are not on site *and* connected to the wired network, make sure you
 
 | Command | Does |
 | --- | --- |
-| `git add .` | Stage everything — new **and** modified files |
+| `git add .` | Stage everything -- new, modified, and deleted files -- in the current directory and its subdirectories |
+| `git add -A` or `git add --all` | Stage everything -- new, modified, and deleted files -- in the entire repository |
 | `git commit -am "msg"` | Stage + commit modified **tracked** files in one step. Does **not** include new untracked files |
 
 ---
@@ -67,7 +67,7 @@ Note: If you are not on site *and* connected to the wired network, make sure you
 - [ ] Commit message describes what was done, in **past tense**
 - [ ] Not committing `Library/`, `Temp/`, or other generated cruft
 
-Unity-specific pre-commit settings live in `_UnityQuickReference.md` §8.
+Unity-specific pre-commit settings live in `Unity Quick Reference.md` §8.
 
 ---
 
@@ -105,7 +105,7 @@ Unity-specific pre-commit settings live in `_UnityQuickReference.md` §8.
 | Command | Does |
 | --- | --- |
 | `git restore <file>` | Discard unstaged changes in one file |
-| `git restore .` | Discard all unstaged changes in the current directory |
+| `git restore .` | Discard all unstaged changes in the current directory and its subdirectories |
 | `git restore --source=<hash> <file>` | Restore one file from a past commit without moving HEAD |
 | `git reset --hard <hash>` | ⚠️ Wipe everything and roll the project back to a commit |
 | `git reset --hard HEAD` | ⚠️ Wipe everything and roll back to the last commit |
@@ -136,7 +136,7 @@ To start a new project (local on Machine 1) and continue it as local on the Mach
     | \# | Command |
     | --- | --- | 
     | 1 | `git init` |
-    | 2 | `git add .` |
+    | 2 | `git add -A` or `git add --all` |
     | 3 | `git commit -m "Initial commit"` |
     | 4 | `gh repo create [Name of Project] --private --source=. --push` |
 
@@ -194,31 +194,31 @@ To start a new project (local on Machine 1) and continue it as local on the Mach
 
 Give the branch a **disposable, descriptive name** — `fix-nav-contrast`, never a reusable one like `updates`. It's `<name>` below.
 
-    | \# | Command | Does |
-    | --- | --- | --- |
-    | 1 | `git switch -c <name>` | Creates a <name> branch off main and switches to it |
-    | 2 | `git push -u origin <name>` | Publishes the branch and sets it to track `origin` |
-        
+| \# | Command | Does |
+| --- | --- | --- |
+| 1 | `git switch -c <name>` | Creates a <name> branch off main and switches to it |
+| 2 | `git push -u origin <name>` | Publishes the branch and sets it to track `origin` |
+
 At this point, Git will give you a link to follow:
-    
-    ```powershell
-    remote: Create a pull request for '<name>' on GitHub by visiting:
-    remote:      https://github.com/kwpledger/kwpledger-site/pull/new/<name>
-    ```
+
+```powershell
+remote: Create a pull request for '<name>' on GitHub by visiting:
+remote:      https://github.com/kwpledger/kwpledger-site/pull/new/<name>
+```
 
 Create the PR as directed and wait for Workers Builds to go green. Then merge the PR. Go back to PowerShell.
-    
-    | \# | Command | Does |
-    | --- | --- | --- |
-    | 3 | `git switch main` | Get off the merged branch |
-    | 4 | `git pull` | Fast-forward to include your merge |
-    | 5 | `git branch -d <name>` | Delete local branch (refuses if unmerged) |
+
+| \# | Command | Does |
+| --- | --- | --- |
+| 3 | `git switch main` | Get off the merged branch |
+| 4 | `git pull` | Fast-forward to include your merge |
+| 5 | `git branch -d <name>` | Delete local branch (refuses if unmerged) |
 
 If **Automatically delete head branches** is ticked in the repo's Settings → General, you're done — it removed the GitHub copy at merge time. If not, one more:
 
-    | \# | Command | Does |
-    | --- | --- | --- |
-    | 6 | `git push origin --delete <name>` | Delete it on GitHub |
+| \# | Command | Does |
+| --- | --- | --- |
+| 6 | `git push origin --delete <name>` | Delete it on GitHub |
 
 Also worth setting once: `git config --global fetch.prune true`. A deleted remote branch then shows as `[origin/<name>: gone]` in `git branch -vv` instead of quietly pulling nothing.
 
@@ -239,7 +239,7 @@ Also worth setting once: `git config --global fetch.prune true`. A deleted remot
 - `Your branch is behind 'origin/main' by N commits, and can be fast-forwarded` is the **safe** message. No merge, no conflict — the pointer just slides forward.
 
 > **Before deleting, prove nothing is stranded on it:**
-> `git merge-base --is-ancestor <branch> origin/main && echo "fully merged"`
+> `git merge-base --is-ancestor <branch> origin/main && echo "fully merged"` (needs PowerShell 7 — see Terminal Quick Reference §1.1)
 > Prints the message = every commit on that branch is already in `main`, safe to delete. Silence = it has unique work; look before you delete.
 
 **The trap:** `git status` line 2 has said `On branch <wrong-thing>` the entire time. It doesn't read as a warning, so you skim past it. When a pull comes back empty and you expected files, check the branch before you check the network.

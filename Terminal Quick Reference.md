@@ -4,7 +4,7 @@
 
 **Verified (and occasionally updated) by:** Claude
 
-**Last updated:** September 17, 2026
+**Last updated:** September 29, 2026
 
 CMD, PowerShell, Bash — plus paths, redirection, and orientation.
 
@@ -21,7 +21,7 @@ CMD, PowerShell, Bash — plus paths, redirection, and orientation.
 
 PowerShell carries aliases that mimic both CMD and Linux — `dir`, `ls`, and `cd` all work. It also runs most CMD commands, but **flag handling differs**, which is where things break.
 
-## 1.1. A Downside, but also an Upside to PowerShell
+### 1.1. Windows PowerShell 5.1 vs PowerShell 7
 
 **Note:** Command Prompt and PowerShell will both open in Windows Terminal. In fact, so will Windows PowerShell. They are different programs. Windows PowerShell (blue icon) is an old version. It has been superseded by PowerShell 7 (x64) (black icon, just referred to in Windows as PowerShell). You want to use this one as it has more functionality. The first time you use it, you need to go into the settings dropdown on Terminal. In the Default Profile dropdown, select the PowerShell with the black icon. This will ensure that you always have the better version load.
 
@@ -41,11 +41,13 @@ How to tell which one you are in: The icon color only helps at launch; if you're
 | Flat recursive listing | `dir /S` | `Get-ChildItem -Recurse \| Select-Object FullName` | `ls -R` or `find .` |
 | Just this folder | `dir` | `ls` | `ls` |
 
-Flag meanings: `/F` = show **F**iles · `/A` = **A**SCII characters · `/S` = include **S**ubdirectories
+Flag meanings: `/F` = show **F**iles · `/A` = **A**SCII characters (for `tree`) and **A**ttributes (for `dir`) · `/S` = include **S**ubdirectories
 
 ---
 
 ## 3. Flag Gotchas
+
+**The underlying rule behind the gotchas collected here:** External `.com`/`.exe` commands take their own flags anywhere; PowerShell aliases that shadow CMD command names do not.
 
 | Command | Valid flags | Trap |
 |---|---|---|
@@ -69,32 +71,61 @@ Same syntax in all three shells:
 | `> file.txt` | Overwrite, or create new |
 | `>> file.txt` | Append to existing |
 
+*Note: The redirection encoding changed between PowerShell 5.1 and 7.*
+1. Windows PowerShell 5.1: `>` and `>>` write **UTF-16LE**
+2. PowerShell 7: they write **UTF-8**, no **BOM**
+
 ```powershell
 tree /F /A > structure.txt
-
+```
+```cmd
 dir "C:\Unity Projects\RHWM Emergency Response v0.5" /s > "C:\Unity Projects\RHWM Emergency Response v0.5\structure.txt"
 ```
 
 ---
 
-## 5. Auto-Suggestions in Terminal
+## 5. Auto-Suggestions (PSReadLine Predictions)
 
-### In the Current Session Only
+### Turning predictions on and off
 
-1. If you want to keep the feature but want to clear the specific command history it uses to make suggestions for your current session, run: `Clear-History`
-    *(Note: This only clears the current session's active command history history buffer).*
-2. To disable the inline predictions, run this command in your PowerShell window: `Set-PSReadLineOption -PredictionSource None`
-3. To turn the auto-suggestions back on, run this command: `Set-PSReadLineOption -PredictionSource History`
-4. To pull predictions from **both** your history and installed plugin modules (Azure, Git predictors), the value is `HistoryAndPlugin`, not `History`: `Set-PSReadLineOption -PredictionSource HistoryAndPlugin` ⚠️ *This line previously repeated the `History` command from item 3, which does not include plugins.*
+| Command | Does |
+|---|---|
+| `Set-PSReadLineOption -PredictionSource None` | Turn inline predictions off |
+| `Set-PSReadLineOption -PredictionSource History` | Predict from your command history |
+| `Set-PSReadLineOption -PredictionSource HistoryAndPlugin` | History **plus** installed predictor modules (Azure, Git) |
+| `Set-PSReadLineOption -PredictionViewStyle ListView` | Show predictions as a list instead of inline (`F2` toggles) |
 
-### To Permanently Disable, Enable, or Tweak
+These apply to the current session only. To make one permanent, put the line in
+your profile: `notepad $PROFILE` (click Yes if prompted to create the file).
 
-To make sure suggestions stay turned off every time you open Windows Terminal, you should add the configuration to your PowerShell profile.
-1. Open your profile script by running: `notepad $PROFILE`
-    *(Note: If prompted to create a new file, click Yes.)*
-2. Paste one of the following options into the document:
-    a. To turn them completely off: `Set-PSReadLineOption -PredictionSource None`
-    b. To use history but switch from inline text to a list view (press F2 to toggle): `Set-PSReadLineOption -PredictionViewStyle ListView`
+### Clearing history — there are three of them
+
+⚠️ `Clear-History` alone does **not** stop old commands from being suggested.
+PowerShell keeps history in three separate places:
+
+| Layer | Cleared by |
+|---|---|
+| Session history (what `Get-History` returns) | `Clear-History` |
+| PSReadLine's in-memory buffer | `[Microsoft.PowerShell.PSConsoleReadLine]::ClearHistory()` |
+| PSReadLine's persistent file (survives restarts) | Clearing `(Get-PSReadLineOption).HistorySavePath` |
+
+Predictions draw from the **PSReadLine** layers, which is why `Clear-History`
+looks like it did nothing.
+
+Add to `$PROFILE` to clear all three at once:
+
+```powershell
+function Clear-FullHistory {
+    Clear-History
+    [Microsoft.PowerShell.PSConsoleReadLine]::ClearHistory()
+    Clear-Content (Get-PSReadLineOption).HistorySavePath -ErrorAction SilentlyContinue
+}
+Set-Alias -Name clh -Value Clear-FullHistory
+```
+Then just run `clh`. Order matters: the in-memory buffer is cleared before the
+file, or PSReadLine can write its entries straight back.
+
+**Before relying on the alias:** run `Get-Alias clh` to confirm nothing already owns it. `clhy` is the built-in alias for `Clear-History`; `clh` appears to be free. `Set-Alias` overwrites silently, so a collision would shadow the existing alias without any warning.
 
 ---
 
